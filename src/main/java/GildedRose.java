@@ -1,105 +1,110 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 
 public class GildedRose {
 
-	private static List<Item> items = null;
+	private static ArrayList<Item> items = null;
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		
-        System.out.println("OMGHAI!");
-		
-        items = new ArrayList<Item>();
-        items.add(new Item("+5 Dexterity Vest", 10, 20));
-        items.add(new Item("Aged Brie", 2, 0));
-        items.add(new Item("Elixir of the Mongoose", 5, 7));
-        items.add(new Item("Sulfuras, Hand of Ragnaros", 0, 80));
-        items.add(new Item("Backstage passes to a TAFKAL80ETC concert", 15, 20));
-        items.add(new Item("Conjured Mana Cake", 3, 6));
+    items = new ArrayList<Item>();
+    items.add(new Item("+5 Dexterity Vest", 10, 20));
+    items.add(new Item("Aged Brie", 2, 0));
+    items.add(new Item("Elixir of the Mongoose", 5, 7));
+    items.add(new Item("Sulfuras, Hand of Ragnaros", 0, 80));
+    items.add(new Item("Backstage passes to a TAFKAL80ETC concert", 15, 20));
+    items.add(new Item("Conjured Mana Cake", 3, 6));
 
-        updateQuality();
-}
+    updateQuality();
+  }
 
+  public GildedRose(ArrayList<Item> items) {
+    this.items = items;
 
+  }
+
+  public ArrayList<Item> getItems() {
+    return items;
+  }
 	
-    public static void updateQuality()
-    {
-        for (int i = 0; i < items.size(); i++)
-        {
-            if ((!"Aged Brie".equals(items.get(i).getName())) && !"Backstage passes to a TAFKAL80ETC concert".equals(items.get(i).getName())) 
-            {
-                if (items.get(i).getQuality() > 0)
-                {
-                    if (!"Sulfuras, Hand of Ragnaros".equals(items.get(i).getName()))
-                    {
-                        items.get(i).setQuality(items.get(i).getQuality() - 1);
-                    }
-                }
-            }
-            else
-            {
-                if (items.get(i).getQuality() < 50)
-                {
-                    items.get(i).setQuality(items.get(i).getQuality() + 1);
+  public static void updateQuality() {
+    Item item = null;
+    
+    for (int i = 0; i < items.size(); i++) {
+      item = items.get(i);
 
-                    if ("Backstage passes to a TAFKAL80ETC concert".equals(items.get(i).getName()))
-                    {
-                        if (items.get(i).getSellIn() < 11)
-                        {
-                            if (items.get(i).getQuality() < 50)
-                            {
-                                items.get(i).setQuality(items.get(i).getQuality() + 1);
-                            }
-                        }
+      /* Sulfuras: do nothing for this legendary item */
+      if (!isItemType(item.getName(), "Sulfuras")) {
+        
+        /* Brie: +1, max: 50 */
+        if (isItemType(item.getName(), "Aged Brie")) {
+          if (item.getQuality() < 50) {
+            item.setQuality(item.getQuality() + 1);
+          }
+      
+        /* Backstage passes: sellIn > 10: +1, sellIn <= 10: +2, sellIn <= 5: +3, sellIn < 0: 0, max: 50 */ 
+        } else if (isItemType(item.getName(), "Backstage passes")) {
+          if (item.getSellIn() > 10) {
+            item.setQuality(item.getQuality() + 1);
 
-                        if (items.get(i).getSellIn() < 6)
-                        {
-                            if (items.get(i).getQuality() < 50)
-                            {
-                                items.get(i).setQuality(items.get(i).getQuality() + 1);
-                            }
-                        }
-                    }
-                }
-            }
+          } else if (item.getSellIn() > 5) {
+            item.setQuality(item.getQuality() + 2);
 
-            if (!"Sulfuras, Hand of Ragnaros".equals(items.get(i).getName()))
-            {
-                items.get(i).setSellIn(items.get(i).getSellIn() - 1);
-            }
+          } else if (item.getSellIn() > 0) {
+            item.setQuality(item.getQuality() + 3);
 
-            if (items.get(i).getSellIn() < 0)
-            {
-                if (!"Aged Brie".equals(items.get(i).getName()))
-                {
-                    if (!"Backstage passes to a TAFKAL80ETC concert".equals(items.get(i).getName()))
-                    {
-                        if (items.get(i).getQuality() > 0)
-                        {
-                            if (!"Sulfuras, Hand of Ragnaros".equals(items.get(i).getName()))
-                            {
-                                items.get(i).setQuality(items.get(i).getQuality() - 1);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        items.get(i).setQuality(items.get(i).getQuality() - items.get(i).getQuality());
-                    }
-                }
-                else
-                {
-                    if (items.get(i).getQuality() < 50)
-                    {
-                        items.get(i).setQuality(items.get(i).getQuality() + 1);
-                    }
-                }
-            }
+          } else {
+            item.setQuality(0);
+
+          }
+
+          if (item.getQuality() > 50) {
+            item.setQuality(50);
+
+          }
+
+        /* Conjured: sellIn >= 0: -2, sellIn < 0: -4, min = 0 */ 
+        } else if (isItemType(item.getName(), "Conjured")) {
+          if (item.getSellIn() > 0) {
+            item.setQuality(item.getQuality() - 2);
+          } else {
+            item.setQuality(item.getQuality() - 4);
+          }
+
+        /* Regular: sellIn > 0: -1, sellIn <= 0: -2, min = 0 */
+        } else {
+          if (item.getSellIn() > 0) {
+            item.setQuality(item.getQuality() - 1);
+          } else {
+            item.setQuality(item.getQuality() - 2);
+          }
+
         }
+
+        /* Item quality can be no less than 0 */
+        if (item.getQuality() < 0) {
+          item.setQuality(0);
+        }
+
+        item.setSellIn(item.getSellIn() - 1);
+
+      }
     }
+  }
+
+
+  private static boolean isItemType(String itemName, String itemType) {
+    Pattern p = Pattern.compile(itemType);
+    Matcher m = p.matcher(itemName);
+    return m.lookingAt();
+  }
+  
 
 }
+
