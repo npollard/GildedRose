@@ -83,6 +83,11 @@ public class GildedRoseTest {
 
   }
 
-
+  @Test
+  public void testConjured() {
+    assertEquals("conjured", 6, gr.items.get(5).getQuality());
+    GildedRose.updateQuality();
+    assertEquals("conjured", 4, gr.items.get(5).getQuality());   
+  }
 
 }
